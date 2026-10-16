@@ -1,0 +1,7 @@
+{
+  "pool": "HYPE/USDC",
+  "source": "Elysium AMM pool (mock)",
+  "token_reserve": 480000.0,
+  "usdc_reserve": 20232000.0,
+  "fee_bps": 30.0
+}

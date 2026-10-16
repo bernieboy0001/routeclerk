@@ -1,0 +1,16 @@
+# RouteClerk state (local CLI gate)
+.routeclerk_state.json
+
+# solc build artifacts
+build/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.venv*/
+
+# os
+.DS_Store
+Thumbs.db

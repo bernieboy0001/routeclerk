@@ -1,0 +1,7 @@
+{
+  "agent": "0xAgentTrader000000000000000000000000000001",
+  "side": "buy",
+  "symbol": "HYPE-PERP",
+  "size_usd": 25000,
+  "max_cost_bps": 8.0
+}

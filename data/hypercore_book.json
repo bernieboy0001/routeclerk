@@ -1,0 +1,24 @@
+{
+  "symbol": "HYPE-PERP",
+  "source": "HyperCore orderbook (mock — replaced by Elysium HyperCore market-data precompile post-ArbOS)",
+  "timestamp_ms": 1792200000000,
+  "taker_fee_bps": 1.0,
+  "asks": [
+    [42.162, 850],
+    [42.168, 1400],
+    [42.175, 2100],
+    [42.186, 3300],
+    [42.201, 5000],
+    [42.224, 7200],
+    [42.260, 11000]
+  ],
+  "bids": [
+    [42.151, 900],
+    [42.144, 1500],
+    [42.136, 2200],
+    [42.124, 3100],
+    [42.109, 4800],
+    [42.087, 7000],
+    [42.051, 10500]
+  ]
+}

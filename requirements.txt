@@ -1,0 +1,2 @@
+# RouteClerk prototype has zero third-party dependencies.
+# Python 3.10+ standard library only.
