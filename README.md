@@ -165,8 +165,12 @@ commitment → fill → autopsy → gate receipt. Open it directly in a browser 
 build step, no server.
 
 It was styled with the [`frontend-design`](https://skills.sh/anthropics/skills)
-skill installed from [skills.sh](https://skills.sh) (see
-[`skills-lock.json`](skills-lock.json) and `.agents/skills/frontend-design/`).
+skill from [skills.sh](https://skills.sh), then reworked with
+[`high-end-visual-design`](https://skills.sh/leonxlnx/taste-skill) and
+[`web-design-guidelines`](https://skills.sh/vercel-labs/agent-skills) — see
+[`skills-lock.json`](skills-lock.json) and `.agents/skills/`. The palette is
+semantic: gold for the commitment, teal when a fill is clear, coral when the gate
+blocks.
 
 ## License
 
