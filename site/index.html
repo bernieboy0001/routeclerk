@@ -15,7 +15,7 @@
     --bg-2:#0a1220;
     --ink:#eef3fb;
     --ink-soft:#a2b2c9;
-    --ink-faint:#63748f;
+    --ink-faint:#8292aa;
     --line:rgba(155,180,215,.16);
     --line-soft:rgba(155,180,215,.09);
     --glass:rgba(255,255,255,.05);
@@ -183,13 +183,14 @@
   .gauge-note{margin-top:9px;font-size:.8rem;color:var(--ink-faint)}
 
   /* ---------- words ---------- */
-  .words{display:grid;grid-template-columns:1fr 1fr;gap:0 40px;border-top:1px solid var(--line)}
-  .word{padding:20px 0;border-bottom:1px solid var(--line)}
-  .word dt{font-weight:600;color:var(--ink);margin-bottom:4px;display:flex;align-items:center;gap:9px}
+  .words{display:grid;gap:0;border-top:1px solid var(--line)}
+  .word{display:grid;grid-template-columns:230px 1fr;gap:24px;align-items:baseline;
+    padding:18px 0;border-bottom:1px solid var(--line)}
+  .word dt{font-weight:600;color:var(--ink);display:flex;align-items:center;gap:9px}
   .word dt .k{width:7px;height:7px;border-radius:50%;background:var(--promise);flex:none}
   .word dd{margin:0;color:var(--ink-soft);font-size:.95rem}
   .word dd .mono{color:var(--ink);font-size:.9em}
-  @media (max-width:720px){.words{grid-template-columns:1fr}}
+  @media (max-width:640px){.word{grid-template-columns:1fr;gap:6px}}
 
   /* ---------- steps ---------- */
   .cards{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -210,7 +211,7 @@
   .code-bar .d1{background:var(--fail)}.code-bar .d2{background:var(--promise)}.code-bar .d3{background:var(--pass)}
   .code-bar .path{margin-left:8px;font-family:var(--mono);font-size:.72rem;color:var(--ink-faint)}
   pre{margin:0;padding:20px 22px;overflow:auto;font-family:var(--mono);font-size:.82rem;line-height:1.75;color:#cbd8ea}
-  pre .c{color:#63748f} pre .k{color:var(--promise);font-weight:500} pre .s{color:var(--pass)}
+  pre .c{color:#8194ac} pre .k{color:var(--promise);font-weight:500} pre .s{color:var(--pass)}
   .addr{margin-top:16px;font-family:var(--mono);font-size:.8rem;color:var(--ink-soft)}
   .addr code{color:var(--ink)}
 
@@ -293,9 +294,9 @@
       </div>
 
       <div class="cta-row">
-        <button class="btn primary" id="runGood">Show a good trade
+        <button type="button" class="btn primary" id="runGood">Show a good trade
           <span class="ico" aria-hidden="true">↗</span></button>
-        <button class="btn ghost" id="runBad">Show a bad trade</button>
+        <button type="button" class="btn ghost" id="runBad">Show a bad trade</button>
       </div>
       <p class="sub" style="margin-top:18px;font-size:.84rem">
         The figures below are the prototype's own output — run <code>python main.py demo</code> to reproduce them.
@@ -326,8 +327,8 @@
               <div>
                 <span class="ttl">The bot promises a price</span>
                 <p>Before trading, it commits to the exchange it will use and the most the trade
-                   should cost — <span class="fig p" id="promised">2.30 bps</span>.
-                   <span class="ok">The promise is signed, so it can't be changed later.</span></p>
+                   should cost —                    <span class="fig p" id="promised">2.30 bps</span>.
+                   The promise is signed, so it can't be changed later.</p>
               </div>
             </div>
 
@@ -369,7 +370,7 @@
                 <span class="vs" id="vMeta">off by 0.50 bps of the allowed 2.0</span>
               </span>
             </span>
-            <button class="btn ghost" id="ack" hidden>Mark as explained</button>
+            <button type="button" class="btn ghost" id="ack" hidden>Mark as explained</button>
           </div>
 
           <div class="gauge-wrap">
@@ -614,8 +615,11 @@
   document.getElementById('runBad').addEventListener('click', function(){ run(false); });
   ack.addEventListener('click', function(){
     vbadge.className = 'vbadge pass';
-    vText.textContent = 'Explained';
-    vMeta.textContent = 'bot may trade again';
+    vText.textContent = 'Explained · cleared';
+    vMeta.textContent = 'breach covered — bot may trade again';
+    verdictTtl.textContent = 'Verdict: explained';
+    verdictText.textContent = 'The breach was explained or covered, so the bot is cleared to open its next trade.';
+    gaugeNote.textContent = 'This trade breached the budget; it was explained, so the bot may trade again.';
     ack.hidden = true;
   });
 
