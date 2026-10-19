@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RouteClerk — the fill is graded before the next order</title>
+<meta name="description" content="An on-chain accountability layer for agents that trade on Elysium and HyperCore. Commit a route and its cost, then face a signed Autopsy before the next action is allowed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#e9eae3;
+    --panel:#f4f5ef;
+    --ink:#1a1c1a;
+    --ink-soft:#5b5f57;
+    --rule:#c8cbc1;
+    --rule-strong:#8f938702;
+    --accent:#1f39d6;
+    --pass:#2e6b34;
+    --fail:#b3261e;
+    --shadow:rgba(26,28,26,.10);
+    --serif:"Fraunces",Georgia,serif;
+    --sans:"Archivo",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:17px;
+    line-height:1.55;
+    font-feature-settings:"tnum" 1,"ss01" 1;
+    -webkit-font-smoothing:antialiased;
+  }
+  .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
+  a:hover{border-bottom-color:var(--accent)}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+
+  /* ---------- masthead ---------- */
+  header.masthead{border-bottom:3px double var(--ink);background:var(--paper)}
+  .masthead .wrap{display:flex;align-items:baseline;justify-content:space-between;gap:24px;padding-top:22px;padding-bottom:14px;flex-wrap:wrap}
+  .logotype{font-family:var(--serif);font-weight:700;font-size:1.5rem;letter-spacing:-.01em;margin:0}
+  .logotype b{color:var(--accent)}
+  .masthead nav{display:flex;gap:22px;font-size:.86rem;color:var(--ink-soft)}
+  .masthead nav a{color:var(--ink-soft);border:0}
+  .masthead nav a:hover{color:var(--ink)}
+  .folio{font-size:.72rem;color:var(--ink-soft);letter-spacing:.14em}
+
+  /* ---------- layout: marginalia rail + report column ---------- */
+  main .wrap{display:grid;grid-template-columns:150px minmax(0,1fr);gap:0}
+  .rail{border-right:1px solid var(--rule);padding:46px 22px 46px 0}
+  .rail ol{list-style:none;margin:0;padding:0;position:sticky;top:26px;display:flex;flex-direction:column;gap:16px}
+  .rail a{display:block;font-size:.78rem;color:var(--ink-soft);border:0;line-height:1.3}
+  .rail a .f{display:block;font-size:.66rem;letter-spacing:.14em;color:color-mix(in srgb,var(--ink-soft) 70%,var(--paper));margin-bottom:2px}
+  .rail a:hover{color:var(--ink)}
+  .report{padding:46px 0 60px 46px;min-width:0}
+
+  section{padding:40px 0;border-top:1px solid var(--rule)}
+  section:first-child{border-top:0;padding-top:6px}
+  h2{font-family:var(--serif);font-weight:600;font-size:clamp(1.6rem,3.4vw,2.4rem);line-height:1.08;letter-spacing:-.015em;margin:0 0 18px;max-width:20ch}
+  h3{font-family:var(--serif);font-weight:600;font-size:1.18rem;margin:0 0 6px}
+  p{margin:0 0 15px;max-width:66ch;color:color-mix(in srgb,var(--ink) 88%,var(--paper))}
+  .lede{font-size:1.08rem}
+  .soft{color:var(--ink-soft)}
+  .kicker{font-size:.82rem;letter-spacing:.02em;color:var(--ink-soft);margin-bottom:20px}
+
+  /* ---------- hero ---------- */
+  .hero h1{
+    font-family:var(--serif);font-weight:600;
+    font-size:clamp(2.4rem,6.4vw,4.4rem);line-height:.98;letter-spacing:-.03em;
+    margin:0 0 22px;max-width:15ch;
+  }
+  .hero h1 em{font-style:italic;font-weight:400;color:var(--accent)}
+  .mechanic{
+    display:flex;flex-wrap:wrap;align-items:center;gap:.5rem 1rem;
+    margin:26px 0 22px;font-size:.9rem;color:var(--ink-soft)
+  }
+  .mechanic .step{color:var(--ink)}
+  .mechanic .arrow{color:var(--rule)}
+
+  .cta-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:30px 0 8px}
+  .btn{
+    font:inherit;font-size:.95rem;font-weight:600;
+    background:var(--ink);color:var(--paper);border:1px solid var(--ink);
+    padding:11px 20px;border-radius:999px;cursor:pointer;
+  }
+  .btn:hover{background:var(--accent);border-color:var(--accent)}
+  .btn.ghost{background:transparent;color:var(--ink)}
+  .btn.ghost:hover{background:transparent;color:var(--accent);border-color:var(--accent)}
+
+  /* ---------- the receipt (single bold moment) ---------- */
+  .receipt{
+    position:relative;margin:34px 0 0;background:var(--panel);
+    border:1px solid var(--rule);
+    box-shadow:0 18px 40px -28px var(--shadow);
+    padding:34px 30px 30px;
+    max-width:640px;
+  }
+  /* perforated top edge */
+  .receipt::before{
+    content:"";position:absolute;left:0;right:0;top:-9px;height:9px;
+    background:
+      radial-gradient(circle at 6px 0, transparent 6px, var(--rule) 6px 6.6px, transparent 6.6px) repeat-x;
+    background-size:12px 9px;
+  }
+  .receipt h3{font-size:1.05rem;margin-bottom:2px}
+  .receipt .sub{font-size:.78rem;color:var(--ink-soft);margin:0 0 20px}
+  .receipt-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+
+  .trace{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;border-top:1px solid var(--rule)}
+  .trace li{
+    display:grid;grid-template-columns:96px 1fr;gap:14px;
+    padding:11px 0;border-bottom:1px solid var(--rule);
+    opacity:0;transform:translateY(4px);transition:opacity .28s ease,transform .28s ease;
+  }
+  .trace li.on{opacity:1;transform:none}
+  .trace .who{font-size:.74rem;letter-spacing:.06em;color:var(--ink-soft);padding-top:3px}
+  .trace .what{min-width:0}
+  .trace .what b{font-weight:600}
+  .trace .what .val{font-variant-numeric:tabular-nums}
+  .bar{height:5px;background:color-mix(in srgb,var(--accent) 16%,var(--panel));margin-top:7px;position:relative;max-width:340px}
+  .bar i{position:absolute;inset:0 auto 0 0;background:var(--accent);width:0;transition:width .5s cubic-bezier(.2,.7,.2,1)}
+
+  /* the stamp — the one animated moment */
+  .stamp{
+    position:absolute;right:6px;bottom:-14px;
+    font-family:var(--serif);font-weight:700;letter-spacing:.12em;
+    font-size:1.02rem;text-transform:uppercase;
+    padding:9px 16px 7px;line-height:1;
+    border:2px solid currentColor;
+    color:var(--pass);
+    background:color-mix(in srgb,var(--pass) 8%,var(--panel));
+    transform:rotate(-7deg) scale(1.7);opacity:0;
+    transition:transform .34s cubic-bezier(.2,1.4,.4,1),opacity .2s ease;
+    box-shadow:inset 0 0 0 1px color-mix(in srgb,currentColor 35%,transparent);
+  }
+  .stamp.show{transform:rotate(-7deg) scale(1);opacity:.94}
+  .stamp[data-verdict="FAIL"]{color:var(--fail);background:color-mix(in srgb,var(--fail) 8%,var(--panel))}
+  .stamp .meta{display:block;font-family:var(--sans);font-weight:500;letter-spacing:0;text-transform:none;font-size:.6rem;opacity:.75;margin-top:3px}
+
+  .gate{
+    margin-top:22px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    font-size:.86rem
+  }
+  .pill{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:999px;border:1px solid var(--rule);font-weight:600;font-size:.78rem}
+  .pill .dot{width:7px;height:7px;border-radius:50%}
+  .pill.clear{color:var(--pass);border-color:color-mix(in srgb,var(--pass) 45%,var(--rule))}
+  .pill.clear .dot{background:var(--pass)}
+  .pill.blocked{color:var(--fail);border-color:color-mix(in srgb,var(--fail) 45%,var(--rule))}
+  .pill.blocked .dot{background:var(--fail)}
+  #ack{align-self:center}
+
+  /* ---------- steps (a real sequence, so numbered) ---------- */
+  .steps{counter-reset:s;display:grid;gap:0;margin-top:8px;border-top:1px solid var(--rule)}
+  .steps .s{display:grid;grid-template-columns:56px 1fr;gap:18px;padding:22px 0;border-bottom:1px solid var(--rule)}
+  .steps .s::before{
+    counter-increment:s;content:"0" counter(s);
+    font-family:var(--serif);font-size:1.05rem;color:var(--accent);padding-top:2px
+  }
+  .steps .s p{margin:0;max-width:64ch}
+
+  /* ---------- two-up notes ---------- */
+  .notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0}
+  .notes .n{padding:22px 26px 22px 0;border-top:1px solid var(--rule)}
+  .notes .n + .n{border-left:1px solid var(--rule);padding-left:26px}
+  .notes .n h3{margin-bottom:8px}
+  .notes .n p{margin:0;font-size:.95rem}
+
+  /* ---------- code ---------- */
+  pre{
+    background:#1a1c1a;color:#e9eae3;border-radius:3px;padding:20px 22px;overflow:auto;
+    font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-size:.82rem;line-height:1.6;margin:0
+  }
+  pre .c{color:#8f9387}
+  pre .k{color:#9db0ff}
+  .addr{margin-top:14px;font-size:.85rem;color:var(--ink-soft)}
+
+  /* ---------- status table ---------- */
+  .status{width:100%;border-collapse:collapse;margin-top:6px}
+  .status th,.status td{text-align:left;padding:11px 14px 11px 0;border-bottom:1px solid var(--rule);vertical-align:top;font-size:.92rem}
+  .status th{font-weight:600;width:150px;color:var(--ink)}
+  .status td{color:var(--ink-soft)}
+
+  footer{border-top:3px double var(--ink);margin-top:10px}
+  footer .wrap{padding:26px 28px 44px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:.82rem;color:var(--ink-soft)}
+
+  @media (max-width:760px){
+    main .wrap{grid-template-columns:1fr}
+    .rail{border-right:0;border-bottom:1px solid var(--rule);padding:22px 0}
+    .rail ol{position:static;flex-direction:row;flex-wrap:wrap;gap:14px}
+    .rail a .f{display:inline;margin-right:6px}
+    .report{padding:30px 0 40px}
+    .receipt .stamp{position:static;display:inline-block;margin-top:18px;transform:rotate(-4deg) scale(1.4)}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .trace li,.stamp,.bar i{transition:none!important}
+    .trace li{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <p class="logotype">Route<b>Clerk</b></p>
+    <nav aria-label="Elsewhere">
+      <span class="folio">Reconciliation of agent execution</span>
+      <a href="https://github.com/bernieboy0001/routeclerk">Repository</a>
+      <a href="#mechanism">Mechanism</a>
+      <a href="#contract">Contract</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <nav class="rail" aria-label="Contents">
+      <ol>
+        <li><a href="#mechanism"><span class="f">F.01</span>The mechanism</a></li>
+        <li><a href="#native"><span class="f">F.02</span>Why Elysium</a></li>
+        <li><a href="#contract"><span class="f">F.03</span>The contract</a></li>
+        <li><a href="#status"><span class="f">F.04</span>Status</a></li>
+      </ol>
+    </nav>
+
+    <div class="report">
+
+      <!-- HERO -->
+      <section class="hero" id="top">
+        <p class="kicker">For agents that trade on Elysium and HyperCore</p>
+        <h1>The fill is graded <em>before</em> the next order is allowed.</h1>
+        <p class="lede" style="max-width:60ch">
+          An agent commits to a route and its expected cost before it acts. When the
+          fill lands, RouteClerk writes an Autopsy that compares what was promised
+          against what actually happened — and blocks the next order until the
+          deviation is acknowledged or covered.
+        </p>
+        <p class="soft" style="max-width:60ch">
+          Once the HyperCore market-data precompile and <span class="num">ElysiumCoreWriter</span>
+          open a 100–200&nbsp;ms path, speed stops being the constraint. Hidden cost
+          becomes the expensive failure. RouteClerk makes that cost enforceable
+          before the agent is allowed to act again.
+        </p>
+
+        <div class="mechanic" aria-hidden="true">
+          <span class="step">Commitment</span><span class="arrow">──</span>
+          <span class="step">Fill</span><span class="arrow">──</span>
+          <span class="step">Autopsy</span><span class="arrow">──</span>
+          <span class="step">Allowed or blocked</span>
+        </div>
+
+        <!-- THE RECEIPT -->
+        <div class="receipt" id="receipt" aria-live="polite">
+          <div class="receipt-head">
+            <div>
+              <h3>Execution receipt</h3>
+              <p class="sub">Demo agent · BUY $25,000 HYPE-PERP · budget 8.0 bps</p>
+            </div>
+          </div>
+
+          <ul class="trace" id="trace">
+            <li data-step="scout">
+              <span class="who">Scout</span>
+              <span class="what">
+                proposes <b>HyperCore</b> at <span class="val">2.30 bps</span> expected cost.
+                ElysiumAMM rejected at <span class="val">72.45 bps</span>.
+                <span class="bar"><i data-w="6%"></i></span>
+              </span>
+            </li>
+            <li data-step="skeptic">
+              <span class="who">Skeptic</span>
+              <span class="what">
+                re-prices the route 3&nbsp;bps against us → <span class="val">5.31 bps</span>; still inside budget.
+                <b>Approve.</b>
+                <span class="bar"><i data-w="10%"></i></span>
+              </span>
+            </li>
+            <li data-step="commit">
+              <span class="who">Commitment</span>
+              <span class="what">
+                digest recorded — <span class="val" style="overflow-wrap:anywhere">9be1a4cab957a80c…0143e022</span>, deadline 5,000&nbsp;ms.
+              </span>
+            </li>
+            <li data-step="fill">
+              <span class="who">Fill</span>
+              <span class="what">
+                avg <span class="val">42.1641</span> vs mid <span class="val">42.1565</span> ·
+                all-in <span class="val" id="realized">2.80 bps</span> · latency <span class="val">140 ms</span>.
+                <span class="bar"><i data-w="7%"></i></span>
+              </span>
+            </li>
+            <li data-step="autopsy">
+              <span class="who">Autopsy</span>
+              <span class="what">
+                committed <span class="val">2.30</span> vs realized <span class="val" id="realized2">2.80</span> bps →
+                deviation <b class="num" id="deviation">+0.50 bps</b> (threshold ±2.0).
+                <span class="bar"><i data-w="9%"></i></span>
+              </span>
+            </li>
+          </ul>
+
+          <div class="stamp" id="stamp" data-verdict="PASS">
+            <span id="stampText">Pass</span>
+            <span class="meta" id="stampMeta">deviation +0.50 bps</span>
+          </div>
+
+          <div class="gate">
+            <span class="pill clear" id="pill"><span class="dot"></span><span id="pillText">Agent clear — may open new risk</span></span>
+            <button class="btn ghost" id="ack" hidden>Acknowledge autopsy</button>
+          </div>
+        </div>
+
+        <div class="cta-row">
+          <button class="btn" id="runClean">Run a clean cycle</button>
+          <button class="btn ghost" id="runStressed">Run a stressed cycle</button>
+          <a href="https://github.com/bernieboy0001/routeclerk">Read the code</a>
+        </div>
+        <p class="soft" style="font-size:.84rem;margin-top:6px">
+          Figures shown are the prototype's own output; run <code>python main.py demo</code> to reproduce them.
+        </p>
+      </section>
+
+      <!-- MECHANISM -->
+      <section id="mechanism">
+        <h2>One promise, one audit, four moves.</h2>
+        <div class="steps">
+          <div class="s">
+            <div>
+              <h3>Commit the route</h3>
+              <p>Before any order intent is accepted, the agent locks a route and its expected all-in cost in basis points, with a deadline. The commitment is hashed and stored so it cannot move after the fact.</p>
+            </div>
+          </div>
+          <div class="s">
+            <div>
+              <h3>Let the fill land</h3>
+              <p>The order executes through the ElysiumCoreWriter path on the user's own HyperCore account. Custody never leaves the user; RouteClerk holds no funds and cannot withdraw.</p>
+            </div>
+          </div>
+          <div class="s">
+            <div>
+              <h3>Write the Autopsy</h3>
+              <p>Realized cost is graded against the commitment: entry versus mid, fees, funding and position drift. The result is a signed receipt, comparable across the Elysium AMM and HyperCore.</p>
+            </div>
+          </div>
+          <div class="s">
+            <div>
+              <h3>Gate the next action</h3>
+              <p>A deviation inside tolerance clears the agent. A breach blocks the next intent until the Autopsy is acknowledged or the deviation is covered with a bond — freeing it for a specialist to challenge.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- NATIVE -->
+      <section id="native">
+        <h2>Native to the venue, not bolted onto it.</h2>
+        <div class="notes">
+          <div class="n">
+            <h3>Reads the real book</h3>
+            <p>Commitments are priced against the HyperCore market-data precompile — full depth, not a proxy feed — so the expected cost is the cost the venue will actually charge.</p>
+          </div>
+          <div class="n">
+            <h3>Writes on the real path</h3>
+            <p>The gate sits in front of ElysiumCoreWriter's 100–200&nbsp;ms write path. The check is one call; it never adds a hop to execution, only a condition.</p>
+          </div>
+          <div class="n">
+            <h3>Comparable everywhere</h3>
+            <p>Because commitments and Autopsies are on-chain, Elysium AMM and HyperCore fills can be scored on the same ledger — by the operator, by the user, and by any specialist paid to challenge a number.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONTRACT -->
+      <section id="contract">
+        <h2>Four functions do the whole job.</h2>
+        <p>The gate is deliberately small. An agent's order path asks one question before it fires, and the answer is on-chain.</p>
+        <pre><code><span class="c">// 1. the agent promises a route and a cost</span>
+submitCommitment(id, routeHash, expectedCostBps, sizeUsd, deadline)
+
+<span class="c">// 2. the order path asks one question before it acts</span>
+canAct(agent)  <span class="c">// true unless a failed autopsy is open</span>
+
+<span class="c">// 3. the Clerk files the autopsy after the fill</span>
+submitAutopsy(id, commitmentId, realizedCostBps, fundingDriftBps, thresholdBps)
+
+<span class="c">// 4. unblock: acknowledge, or cover the deviation</span>
+acknowledgeAutopsy(id)  /  coverDeviation(id)  <span class="k">payable</span></code></pre>
+        <p class="addr">
+          Solidity <span class="num">0.8.24</span> · <code>contracts/RouteClerkGate.sol</code> ·
+          testnet deploy on Elysium chain id <span class="num">99801</span> (address to follow).
+          Compiles clean; see <code>scripts/deploy.md</code>.
+        </p>
+      </section>
+
+      <!-- STATUS -->
+      <section id="status">
+        <h2>Where it stands.</h2>
+        <table class="status">
+          <tbody>
+            <tr><th>Working today</th><td>Agent loop with Commitment and Autopsy logic; mandate checks and basic testnet payment between agents; integration points mapped to the Elysium RPC, the market-data precompile, and the CoreWriter intent flow; non-custodial constraint architecture.</td></tr>
+            <tr><th>In development</th><td>Coordination contracts gating intents on Autopsy status; CoreWriter callback handling; deviation bonding and the specialist challenge market; operator dashboard.</td></tr>
+            <tr><th>Before launch</th><td>Security review of the gating and bonding contracts; testnet on simulated HyperCore data, then the real precompile; one design-partner trading or market-making agent; an SDK for other builders.</td></tr>
+            <tr><th>Timeline</th><td>Testnet MVP, late October–November 2026; mainnet-ready alongside the ElysiumCoreWriter upgrade; no token required for the core product.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>RouteClerk — on-chain accountability for trading agents. Users keep custody; RouteClerk only gates intents.</span>
+    <span><a href="https://github.com/bernieboy0001/routeclerk">github.com/bernieboy0001/routeclerk</a></span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var steps = Array.prototype.slice.call(document.querySelectorAll('#trace li'));
+  var stamp = document.getElementById('stamp');
+  var stampText = document.getElementById('stampText');
+  var stampMeta = document.getElementById('stampMeta');
+  var pill = document.getElementById('pill');
+  var pillText = document.getElementById('pillText');
+  var ack = document.getElementById('ack');
+  var realizedEls = [document.getElementById('realized'), document.getElementById('realized2')];
+  var deviationEl = document.getElementById('deviation');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var timers = [];
+
+  function clearTimers(){ timers.forEach(clearTimeout); timers = []; }
+  function after(ms, fn){ timers.push(setTimeout(fn, ms)); }
+
+  function reset(){
+    clearTimers();
+    steps.forEach(function(li){
+      li.classList.remove('on');
+      var bar = li.querySelector('.bar i');
+      if (bar) bar.style.width = '0';
+    });
+    stamp.classList.remove('show');
+    stamp.dataset.verdict = 'PASS';
+    ack.hidden = true;
+    pill.className = 'pill clear';
+    pillText.textContent = 'Agent clear — may open new risk';
+  }
+
+  function run(stressed){
+    reset();
+    var realized = stressed ? '8.31' : '2.80';
+    var deviation = stressed ? '+6.00 bps' : '+0.50 bps';
+    var gap = reduce ? 0 : 520;
+
+    realizedEls.forEach(function(el){ el.textContent = realized + ' bps'; });
+    deviationEl.textContent = deviation;
+
+    function revealStep(li){
+      li.classList.add('on');
+      var bar = li.querySelector('.bar i');
+      if (!bar) return;
+      if (reduce) bar.style.width = bar.dataset.w;
+      else after(30, function(){ bar.style.width = bar.dataset.w; });
+    }
+
+    function resolve(){
+      var pass = !stressed;
+      stamp.dataset.verdict = pass ? 'PASS' : 'FAIL';
+      stampText.textContent = pass ? 'Pass' : 'Fail';
+      stampMeta.textContent = 'deviation ' + deviation;
+      stamp.classList.add('show');
+
+      if (pass){
+        pill.className = 'pill clear';
+        pillText.textContent = 'Agent clear — may open new risk';
+        ack.hidden = true;
+      } else {
+        pill.className = 'pill blocked';
+        pillText.textContent = 'Agent blocked — next intent refused';
+        ack.hidden = false;
+      }
+    }
+
+    // reduced motion: apply the resolved state at once, no timers
+    if (reduce){
+      steps.forEach(revealStep);
+      resolve();
+      return;
+    }
+
+    steps.forEach(function(li, i){ after(120 + i * gap, function(){ revealStep(li); }); });
+    after(120 + steps.length * gap, resolve);
+  }
+
+  document.getElementById('runClean').addEventListener('click', function(){ run(false); });
+  document.getElementById('runStressed').addEventListener('click', function(){ run(true); });
+  ack.addEventListener('click', function(){
+    pill.className = 'pill clear';
+    pillText.textContent = 'Agent clear — autopsy acknowledged';
+    ack.hidden = true;
+  });
+
+  // initial state: a clean cycle resolved
+  run(false);
+})();
+</script>
+</body>
+</html>

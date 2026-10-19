@@ -12,6 +12,8 @@ the Autopsy is acknowledged or the deviation is covered.
 Custody stays with the user. RouteClerk never holds funds — it only gates the
 agent's ability to open new risk.
 
+**Repository:** https://github.com/bernieboy0001/routeclerk · **Landing page:** [`site/index.html`](site/index.html)
+
 ---
 
 ## The problem
@@ -152,6 +154,19 @@ on-chain trading infrastructure, and Hyperliquid-ecosystem tools. Contact: X DM.
 ## Submission text
 
 The full, locked builder-submission write-up is in [`SUBMISSION.md`](SUBMISSION.md).
+
+## Landing page
+
+![RouteClerk landing page](site/preview.png)
+
+[`site/index.html`](site/index.html) is a single self-contained page that walks
+the mechanic and replays the prototype's own figures as an interactive
+commitment → fill → autopsy → gate receipt. Open it directly in a browser — no
+build step, no server.
+
+It was styled with the [`frontend-design`](https://skills.sh/anthropics/skills)
+skill installed from [skills.sh](https://skills.sh) (see
+[`skills-lock.json`](skills-lock.json) and `.agents/skills/frontend-design/`).
 
 ## License
 
