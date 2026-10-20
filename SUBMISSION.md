@@ -1,12 +1,6 @@
 # RouteClerk — Ascend × Elysium Builder Competition Submission
 
-_Updated: 2026-10-20. Canonical submission text — matches the official 6-section template._
 
-> **One thing to confirm before pasting into the ticket**
-> 1. **X handle / domain:** `@RouteClerk` and `routeclerk.xyz` are placeholders — the live
->    site today is **https://routeclerk.vercel.app**.
-
----
 
 ## 1. Project + Links
 
@@ -54,9 +48,7 @@ fill's true cost **enforceable before the next action is allowed**.
 dependencies** (Python 3.10+ stdlib only).
 
 **The 90-second demo:** [`demo/routeclerk-demo.mp4`](demo/routeclerk-demo.mp4)
-(1280×720, captions burned in, voiceover; silent variant:
-[`demo/routeclerk-demo-silent.mp4`](demo/routeclerk-demo-silent.mp4); script:
-[`demo/narration.txt`](demo/narration.txt)). Every figure is a replay of a real
+Every figure is a replay of a real
 `python main.py demo` run.
 
 **What currently works**
@@ -69,27 +61,7 @@ dependencies** (Python 3.10+ stdlib only).
 - **`RouteClerkGate.sol`** — compiles clean (solc 0.8.24) to `build/…{bin,abi}`.
 - **Landing page** — single self-contained `site/index.html`, no build step, deployed.
 
-**Main user experience (in the video)**
-| Time | Screen | What happens |
-| --- | --- | --- |
-| 0:00–0:09 | Title | "Agents are about to trade real money on Elysium at 200 ms. Who checks the fill?" |
-| 0:09–0:14 | Problem | A route is chosen once, the fill is never re-checked, the next trade fires anyway. |
-| 0:14–0:40 | Terminal — clean cycle | Scout picks **HyperCore @ 2.30 bps** and rejects **ElysiumAMM @ 72.45 bps** (over the **8.0 bps** budget); Skeptic stress @ 3 bps → **APPROVE**; commitment hashed, **5,000 ms** deadline; fill **42.1641** vs mid **42.1565**; all-in **2.80 bps**; latency **140 ms**; Autopsy **PASS** (+0.50 ≤ ±2.0); gate **CLEAR**. |
-| 0:40–0:54 | Receipt — clean | The same cycle as a receipt: venue comparison, digest, deadline, latency, cost bars, PASS stamp. |
-| 0:54–1:04 | Terminal — breach | Book runs **6 bps** adverse: fill **42.1873**, all-in **8.31 bps**, Autopsy **FAIL** (+6.00), gate **BLOCKED**; new intent **refused**. |
-| 1:04–1:12 | Receipt — blocked | FAIL stamp, BLOCKED badge, cost gauge crossing the 8.0 bps threshold. |
-| 1:12–1:22 | The point | "The fill doesn't get to be its own judge." Commit → Fill → Autopsy → Gate. |
-| 1:22–1:30 | Close | RouteClerk · routeclerk.vercel.app · "Custody stays yours." |
 
-**Most important functionality:** the **gate** itself — the moment the agent is refused
-permission to open its next trade because the last fill didn't match its promise, and the
-moment an operator clears it. Route choice, stress test, commitment hash and Autopsy all feed
-that one property.
-
-**Reproduce it:** `python main.py demo` prints the same two cycles;
-[`site/index.html`](site/index.html) replays the numbers in a browser. The video uses one
-run's identifiers (clean commitment `608de4d8…9b4b`, autopsy `30bbbbb57c3a`; stressed
-commitment `f237f9c3…223a`, autopsy `47eb4a412365`) — digests are run-specific.
 
 ## 4. Current Status + Launch Plan
 
@@ -146,13 +118,9 @@ attribution and constrained agent execution instead of rebuilding it.
 
 ## 6. Team
 
-- **Team members:** _[CONFIRM: names / pseudonyms and roles — e.g. "Builder 1 — agent + contract systems; Builder 2 — frontend + docs"]_
-- **Team size:** small pseudonymous team, 2–3 people.
-- **Relevant experience:** agent systems, on-chain trading infrastructure, and
-  Hyperliquid-ecosystem tooling. _[CONFIRM: add concrete prior work per member]_
-- **Best contact:** X DM to **@RouteClerk** _(confirm handle)_ — or Discord.
-
----
+- **Team members:**  Delight Bernard (RerunJago)
+- **Team size:** 1
+-
 
 ### Appendix — Why this is stronger
 
