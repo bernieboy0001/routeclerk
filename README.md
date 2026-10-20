@@ -12,7 +12,7 @@ the Autopsy is acknowledged or the deviation is covered.
 Custody stays with the user. RouteClerk never holds funds — it only gates the
 agent's ability to open new risk.
 
-**Repository:** https://github.com/bernieboy0001/routeclerk · **Landing page:** [`site/index.html`](site/index.html)
+**Repository:** `github.com/bernieboy0001/routeclerk` (private while in development) · **Landing page:** [`site/index.html`](site/index.html)
 
 ---
 
@@ -110,8 +110,9 @@ filled after deploy (chain id 99801)._
 ## Status
 
 **Working today**
-- Agent loop with Route Commitment and Autopsy generation logic.
-- Mandate checks and basic on-chain payment between agents (testnet).
+- Agent loop with Route Commitment and Autopsy generation logic (Scout → Skeptic → Clerk → Autopsy), stdlib only.
+- Gate state machine that refuses a blocked agent's next commitment until `ack`/`--cover`.
+- `RouteClerkGate.sol` compiles clean to `build/…{bin,abi}`; deploy runbook for testnet (chain id 99801).
 - Integration points mapped to Elysium RPC, the upcoming market-data precompile, and the `ElysiumCoreWriter` intent flow.
 - Architecture for non-custodial constraint (agent cannot withdraw; only order intents are gated).
 

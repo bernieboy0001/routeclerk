@@ -154,8 +154,17 @@
   .step.s2 .badge{color:var(--trade);border-color:color-mix(in srgb,var(--trade) 45%,transparent);background:color-mix(in srgb,var(--trade) 12%,transparent)}
   .step.s3 .badge{color:var(--check);border-color:color-mix(in srgb,var(--check) 45%,transparent);background:color-mix(in srgb,var(--check) 12%,transparent)}
   .step.s4 .badge{color:var(--ink-soft);border-color:var(--line);background:var(--glass)}
+  .step.s5 .badge{color:var(--promise);border-color:color-mix(in srgb,var(--promise) 45%,transparent);background:color-mix(in srgb,var(--promise) 12%,transparent)}
   .step .ttl{font-weight:600;color:var(--ink);display:block;margin-bottom:3px}
-  .step p{margin:0;color:var(--ink-soft);font-size:.96rem;max-width:60ch}
+  .step p{margin:0;color:var(--ink-soft);font-size:.96rem;max-width:62ch}
+  .step .agent{font-family:var(--mono);font-size:.63rem;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--ink-faint);display:block;margin-bottom:6px}
+  .step .figs{margin:9px 0 0;font-family:var(--mono);font-size:.78rem;line-height:1.75;color:var(--ink-soft);max-width:66ch}
+  .step .bar{height:5px;border-radius:99px;background:rgba(155,180,215,.12);margin-top:11px;max-width:360px;overflow:hidden}
+  .step .bar i{display:block;height:100%;width:0;border-radius:99px;transition:width .7s var(--ease)}
+  .step .bar i.gold{background:linear-gradient(90deg,var(--promise),#ffd98a)}
+  .step .bar i.teal{background:linear-gradient(90deg,var(--pass),#7df3d6)}
+  .step .bar i.red{background:linear-gradient(90deg,var(--fail),#ff9aa9)}
   .step .fig{font-family:var(--mono);font-variant-numeric:tabular-nums;color:var(--ink);background:rgba(155,180,215,.09);
     padding:1px 7px;border-radius:6px;font-size:.86em;white-space:nowrap}
   .step .fig.p{color:var(--promise)} .step .fig.c{color:var(--check)} .step .fig.r{color:var(--fail)}
@@ -181,6 +190,7 @@
   .gauge .fill.over{background:linear-gradient(90deg,var(--fail),#ff9aa9)}
   .gauge .thresh{position:absolute;top:-4px;bottom:-4px;left:25%;width:2px;background:var(--ink-soft);opacity:.7}
   .gauge-note{margin-top:9px;font-size:.8rem;color:var(--ink-faint)}
+  .verdict-text{margin:14px 0 0;color:var(--ink-soft);font-size:.96rem;max-width:62ch}
 
   /* ---------- words ---------- */
   .words{display:grid;gap:0;border-top:1px solid var(--line)}
@@ -294,12 +304,13 @@
       </div>
 
       <div class="cta-row">
-        <button type="button" class="btn primary" id="runGood">Show a good trade
+        <button type="button" class="btn primary" id="runGood">Run a clean cycle
           <span class="ico" aria-hidden="true">↗</span></button>
-        <button type="button" class="btn ghost" id="runBad">Show a bad trade</button>
+        <button type="button" class="btn ghost" id="runBad">Run a stressed cycle</button>
       </div>
       <p class="sub" style="margin-top:18px;font-size:.84rem">
-        The figures below are the prototype's own output — run <code>python main.py demo</code> to reproduce them.
+        Clean = the trade lands near the promise. Stressed = the book runs 6 bps against the bot. Both are the
+        prototype's own output — run <code>python main.py demo</code> to reproduce them.
       </p>
     </section>
 
@@ -316,48 +327,76 @@
             <div>
               <p class="overline">Trade receipt</p>
               <h3>Buy $25,000 of HYPE</h3>
-              <p class="rs" id="rSub">a bot buys a crypto asset on the HyperCore exchange</p>
+              <p class="rs" id="rSub">a bot buys a crypto asset on HyperCore — one full cycle, agent 0xDemoAgent…0001</p>
             </div>
-            <div class="budget">Allowed worst case<b>2.0 <span style="font-weight:400">bps</span></b></div>
+            <div class="budget">Worst case allowed<b>8.0 <span style="font-weight:400">bps</span></b></div>
           </div>
 
           <div class="flow" id="flow">
             <div class="step s1">
               <span class="badge">1</span>
               <div>
+                <span class="agent">Scout · picks the route</span>
                 <span class="ttl">The bot promises a price</span>
-                <p>Before trading, it commits to the exchange it will use and the most the trade
-                   should cost —                    <span class="fig p" id="promised">2.30 bps</span>.
-                   The promise is signed, so it can't be changed later.</p>
+                <p>Before trading, the bot shops the same order across venues, picks the cheapest, and
+                   commits to the most the trade should cost. The promise is signed, so it can't be changed later.</p>
+                <p class="figs">HyperCore <span class="fig p">2.30 bps</span> expected (impact 1.30 + fee 1.00)
+                   · rejected ElysiumAMM at <span class="fig">72.45 bps</span> — over the <span class="fig">8.0 bps</span> budget</p>
+                <span class="bar"><i class="gold" id="barScout"></i></span>
               </div>
             </div>
 
             <div class="step s2">
               <span class="badge">2</span>
               <div>
-                <span class="ttl">The trade happens</span>
-                <p>The order goes to <strong>HyperCore</strong> and fills at an average price of
-                   <span class="fig" id="fillPrice">42.1641</span>, against a fair market price of
-                   <span class="fig" id="midPrice">42.1565</span>.</p>
+                <span class="agent">Skeptic · double-checks</span>
+                <span class="ttl">A second agent stress-tests the route</span>
+                <p>It re-prices the route assuming the market moves 3 bps against the bot. The cost rises
+                   but stays inside budget, so the route is approved.</p>
+                <p class="figs">stress re-price @ 3 bps adverse → <span class="fig p">5.31 bps</span>
+                   · verdict <span class="fig c">APPROVE</span></p>
+                <span class="bar"><i class="gold" id="barSkeptic"></i></span>
               </div>
             </div>
 
             <div class="step s3">
               <span class="badge">3</span>
               <div>
-                <span class="ttl">RouteClerk checks the receipt</span>
-                <p>It compares what was promised (<span class="fig p" id="promised2">2.30</span> bps) with what
-                   actually happened (<span class="fig c" id="actual">2.80</span> bps). The gap is
-                   <span class="fig c" id="offBy">0.50 bps</span>, against an allowed worst case of
-                   <span class="fig">2.0 bps</span>.</p>
+                <span class="agent">Commitment · the promise locked</span>
+                <span class="ttl">The route and cost are fingerprinted</span>
+                <p>The chosen route and cost are hashed and stored with a deadline to fill — so the bot
+                   can't quietly change its story after the trade.</p>
+                <p class="figs">digest <span class="fig" id="digest">940e7843…bd5139</span>
+                   · deadline <span class="fig">5,000 ms</span></p>
               </div>
             </div>
 
             <div class="step s4">
               <span class="badge">4</span>
               <div>
-                <span class="ttl" id="verdictTtl">Verdict: within budget</span>
-                <p id="verdictText">The small gap is fine. The bot is cleared and may open its next trade.</p>
+                <span class="agent">Fill · the trade runs</span>
+                <span class="ttl">The order executes on HyperCore</span>
+                <p>It runs through Elysium's fast order path on the user's own account — custody never
+                   leaves the user.</p>
+                <p class="figs">avg <span class="fig" id="fillPrice">42.1641</span> vs mid
+                   <span class="fig" id="midPrice">42.1565</span> · all-in
+                   <span class="fig" id="realized">2.80 bps</span> (impact <span class="fig" id="impact">1.80</span> + fee 1.00)
+                   · latency <span class="fig">140 ms</span></p>
+                <span class="bar"><i class="teal" id="barFill"></i></span>
+              </div>
+            </div>
+
+            <div class="step s5">
+              <span class="badge">5</span>
+              <div>
+                <span class="agent">Autopsy · the receipt</span>
+                <span class="ttl">Real cost is graded against the promise</span>
+                <p>The signed receipt is written: what was promised against what actually happened, itemised.</p>
+                <p class="figs">committed <span class="fig p">2.30</span> vs realized
+                   <span class="fig c" id="realized2">2.80</span> bps → deviation
+                   <span class="fig c" id="offBy">+0.50 bps</span> (allowed ±2.0)
+                   · entry-vs-mid <span class="fig" id="entryMid">1.80</span> · fees 1.00 · funding 0.00</p>
+                <span class="bar"><i class="teal" id="barAutopsy"></i></span>
               </div>
             </div>
           </div>
@@ -367,16 +406,17 @@
               <span class="dot"></span>
               <span>
                 <span class="vt" id="vText">Cleared to trade</span>
-                <span class="vs" id="vMeta">off by 0.50 bps of the allowed 2.0</span>
+                <span class="vs" id="vMeta">off by +0.50 bps of the allowed ±2.0</span>
               </span>
             </span>
             <button type="button" class="btn ghost" id="ack" hidden>Mark as explained</button>
           </div>
+          <p class="verdict-text" id="verdictText">The small gap is fine. The bot is cleared and may open its next trade.</p>
 
           <div class="gauge-wrap">
-            <div class="gauge-lab"><span>Off budget</span><span>Allowed: 2.0 bps</span></div>
-            <div class="gauge"><span class="fill" id="gaugeFill"></span><span class="thresh" title="allowed worst case"></span></div>
-            <p class="gauge-note">The white line marks the worst case the bot was allowed. Stay left of it and the bot trades on; cross it and the bot is paused.</p>
+            <div class="gauge-lab"><span>Promise vs reality (deviation)</span><span>Allowed: ±2.0 bps</span></div>
+            <div class="gauge"><span class="fill" id="gaugeFill"></span><span class="thresh" title="allowed deviation threshold"></span></div>
+            <p class="gauge-note">The white line marks the biggest gap the bot was allowed between its promise and the real result. Stay left of it and the bot trades on; cross it and the bot is paused.</p>
           </div>
         </div>
       </div>
@@ -386,7 +426,7 @@
     <section id="words">
       <div class="sec-head reveal">
         <span class="eyebrow"><span class="led"></span>In plain English</span>
-        <h2>The five words that matter.</h2>
+        <h2>The eight words that matter.</h2>
         <p class="lead" style="margin-top:14px">You don't need any trading knowledge. Here is every piece of jargon on this page, translated.</p>
       </div>
       <dl class="words reveal">
@@ -397,6 +437,14 @@
         <div class="word">
           <dt><span class="k"></span>Mid price</dt>
           <dd>The midpoint between the best buy and best sell price. The fair "reference" price the bot is judged against.</dd>
+        </div>
+        <div class="word">
+          <dt><span class="k"></span>Budget</dt>
+          <dd>The most a trade is allowed to cost, set before it runs — here <span class="mono">8.0 bps</span>. A route that can't fit the budget is thrown out.</dd>
+        </div>
+        <div class="word">
+          <dt><span class="k"></span>Deviation</dt>
+          <dd>The gap between the promised cost and the real cost. Most a clean trade may drift is <span class="mono">±2.0 bps</span>; more than that and the bot is paused.</dd>
         </div>
         <div class="word">
           <dt><span class="k"></span>Commitment</dt>
@@ -547,19 +595,27 @@
   var vbadge = document.getElementById('vbadge');
   var vText = document.getElementById('vText');
   var vMeta = document.getElementById('vMeta');
-  var verdictTtl = document.getElementById('verdictTtl');
   var verdictText = document.getElementById('verdictText');
   var ack = document.getElementById('ack');
   var fill = document.getElementById('gaugeFill');
   var gaugeNote = document.querySelector('.gauge-note');
 
   var F = {
-    promised: document.getElementById('promised'),
-    promised2: document.getElementById('promised2'),
+    digest: document.getElementById('digest'),
     fillPrice: document.getElementById('fillPrice'),
     midPrice: document.getElementById('midPrice'),
-    actual: document.getElementById('actual'),
-    offBy: document.getElementById('offBy')
+    realized: document.getElementById('realized'),
+    impact: document.getElementById('impact'),
+    realized2: document.getElementById('realized2'),
+    offBy: document.getElementById('offBy'),
+    entryMid: document.getElementById('entryMid')
+  };
+
+  var bar = {
+    scout: document.getElementById('barScout'),
+    skeptic: document.getElementById('barSkeptic'),
+    fill: document.getElementById('barFill'),
+    autopsy: document.getElementById('barAutopsy')
   };
 
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -573,34 +629,47 @@
     ack.hidden = true;
     fill.style.width = '0';
     fill.classList.toggle('over', !good);
+    Object.keys(bar).forEach(function(k){ bar[k].style.width = '0'; });
 
-    // figures (prototype output: clean = 2.80, stressed = 8.31)
-    F.fillPrice.textContent = good ? '42.1641' : '42.1710';
-    F.midPrice.textContent = good ? '42.1565' : '42.1708';
-    F.actual.textContent = good ? '2.80' : '8.31';
-    F.actual.className = 'fig ' + (good ? 'c' : 'r');
-    F.offBy.textContent = good ? '0.50 bps' : '6.00 bps';
+    // figures: real prototype output (clean = 2.80 bps / deviation +0.50;
+    // stressed = book 6 bps adverse -> 8.31 bps / deviation +6.00)
+    F.digest.textContent = good ? '940e7843…bd5139' : 'c4d649e3…d2b334';
+    F.fillPrice.textContent = good ? '42.1641' : '42.1873';
+    F.midPrice.textContent = '42.1565';
+    F.realized.textContent = good ? '2.80 bps' : '8.31 bps';
+    F.realized.className = 'fig ' + (good ? 'c' : 'r');
+    F.impact.textContent = good ? '1.80' : '7.31';
+    F.realized2.textContent = good ? '2.80' : '8.31';
+    F.realized2.className = 'fig ' + (good ? 'c' : 'r');
+    F.offBy.textContent = good ? '+0.50 bps' : '+6.00 bps';
     F.offBy.className = 'fig ' + (good ? 'c' : 'r');
+    F.entryMid.textContent = good ? '1.80' : '7.31';
+
+    // cost bars, scaled to the 8.0 bps budget (autopsy bar to the ±2.0 threshold)
+    bar.scout.style.width = '29%';
+    bar.skeptic.style.width = '66%';
+    bar.fill.className = good ? 'teal' : 'red';
+    bar.fill.style.width = good ? '35%' : '100%';
+    bar.autopsy.className = good ? 'teal' : 'red';
+    bar.autopsy.style.width = good ? '25%' : '100%';
 
     var gap = reduce ? 0 : 480;
     steps.forEach(function(s, i){ after(90 + i * gap, function(){ s.classList.add('on'); }); });
 
     function resolve(){
-      // keep step 3's "actual"/"off by" fills, then verdict
+      // gauge: deviation as a share of the 8.0 bps budget (0.50 -> 6%, 6.00 -> 75%)
       fill.style.width = good ? '6%' : '75%';
 
       if (good){
         vbadge.className = 'vbadge pass';
         vText.textContent = 'Cleared to trade';
-        vMeta.textContent = 'off by 0.50 bps of the allowed 2.0';
-        verdictTtl.textContent = 'Verdict: within budget';
+        vMeta.textContent = 'off by +0.50 bps of the allowed ±2.0';
         verdictText.textContent = 'The small gap is fine. The bot is cleared and may open its next trade.';
         gaugeNote.textContent = 'The gap stayed left of the line, so the bot trades on.';
       } else {
         vbadge.className = 'vbadge fail';
         vText.textContent = 'Paused';
-        vMeta.textContent = 'off by 6.00 bps of the allowed 2.0';
-        verdictTtl.textContent = 'Verdict: over budget';
+        vMeta.textContent = 'off by +6.00 bps of the allowed ±2.0';
         verdictText.textContent = 'The cost was far worse than promised. The bot is paused and its next trade is refused until the gap is explained or covered.';
         gaugeNote.textContent = 'The gap crossed the line, so the bot is paused.';
         ack.hidden = false;
@@ -617,7 +686,6 @@
     vbadge.className = 'vbadge pass';
     vText.textContent = 'Explained · cleared';
     vMeta.textContent = 'breach covered — bot may trade again';
-    verdictTtl.textContent = 'Verdict: explained';
     verdictText.textContent = 'The breach was explained or covered, so the bot is cleared to open its next trade.';
     gaugeNote.textContent = 'This trade breached the budget; it was explained, so the bot may trade again.';
     ack.hidden = true;
