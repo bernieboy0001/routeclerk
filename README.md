@@ -12,7 +12,7 @@ the Autopsy is acknowledged or the deviation is covered.
 Custody stays with the user. RouteClerk never holds funds — it only gates the
 agent's ability to open new risk.
 
-**Repository:** `github.com/bernieboy0001/routeclerk` (private while in development) · **Landing page:** [`site/index.html`](site/index.html)
+**Repository:** https://github.com/bernieboy0001/routeclerk · **Live site:** https://routeclerk.vercel.app · **Landing page source:** [`site/index.html`](site/index.html)
 
 ---
 

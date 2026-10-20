@@ -2,11 +2,8 @@
 
 _Updated: 2026-10-20. Canonical submission text — matches the official 6-section template._
 
-> **Two things to confirm before pasting into the ticket**
-> 1. **GitHub:** the local repo tracks `github.com/bernieboy0001/routeclerk`, but that remote
->    currently returns *"Repository not found"* — it is **not published**. Either push it
->    (public or private + organizer access) or drop the GitHub link from §1.
-> 2. **X handle / domain:** `@RouteClerk` and `routeclerk.xyz` are placeholders — the live
+> **One thing to confirm before pasting into the ticket**
+> 1. **X handle / domain:** `@RouteClerk` and `routeclerk.xyz` are placeholders — the live
 >    site today is **https://routeclerk.vercel.app**.
 
 ---
@@ -16,8 +13,7 @@ _Updated: 2026-10-20. Canonical submission text — matches the official 6-secti
 - **Project name:** RouteClerk
 - **X account:** @RouteClerk _(confirm handle)_
 - **Website:** https://routeclerk.vercel.app — live now. Custom domain `routeclerk.xyz` pending DNS.
-- **GitHub / docs:** private repo while in development (`bernieboy0001/routeclerk`) — not yet
-  published; access can be shared with organizers on request. In-repo docs:
+- **GitHub / docs:** https://github.com/bernieboy0001/routeclerk (public). In-repo docs:
   [`README.md`](README.md), [`SUBMISSION.md`](SUBMISSION.md), [`scripts/deploy.md`](scripts/deploy.md).
 - **Demo video:** [`demo/routeclerk-demo.mp4`](demo/routeclerk-demo.mp4) — 90s, captioned, with voiceover.
 
